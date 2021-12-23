@@ -1,10 +1,11 @@
 import 'package:chat_app/screens/home_page.dart';
+import 'package:chat_app/screens/shared/sharedWidgets.dart';
 import 'package:chat_app/screens/signup.dart';
+import 'package:chat_app/services/authServices.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,9 +13,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController userNameController=  TextEditingController();
-  TextEditingController emailController=TextEditingController();
-  TextEditingController passwordController=TextEditingController();
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  bool isInCall = false;
 
   @override
   void initState() {
@@ -23,17 +25,25 @@ class _LoginPageState extends State<LoginPage> {
     passwordController.clear();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30,vertical: 50),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Center(child: Text('Login',  style: GoogleFonts.montserrat(
-              textStyle:const TextStyle(color: Colors.black, fontSize: 25,fontWeight: FontWeight.bold),
-            ),)),
+            Center(
+                child: Text(
+              'Login',
+              style: GoogleFonts.montserrat(
+                textStyle: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold),
+              ),
+            )),
             Column(
               children: [
                 Container(
@@ -44,23 +54,28 @@ class _LoginPageState extends State<LoginPage> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
-                      children:[
-                        const Icon(Icons.person,size: 25,),
-                        const SizedBox(width: 20,),
+                      children: [
+                        const Icon(
+                          Icons.person,
+                          size: 25,
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
                         Expanded(
                           child: TextField(
                             controller: userNameController,
                             decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Username'
-                            ),
+                                border: InputBorder.none, hintText: 'Username'),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 30,),
+                const SizedBox(
+                  height: 30,
+                ),
                 Container(
                   //width: 200,
                   decoration: BoxDecoration(
@@ -71,16 +86,20 @@ class _LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
                       children: [
-                        const Icon(Icons.lock,size: 25,),
-                        const SizedBox(width: 20,),
+                        const Icon(
+                          Icons.lock,
+                          size: 25,
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
                         Expanded(
                           child: TextField(
                             controller: passwordController,
                             obscureText: true,
                             decoration: const InputDecoration(
                                 border: InputBorder.none,
-                                hintText: 'Enter password'
-                            ),
+                                hintText: 'Enter password'),
                           ),
                         ),
                       ],
@@ -89,38 +108,76 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
-
             Column(
               children: [
                 InkWell(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>
-                        HomePage()));
+                  onTap: () {
+                    var body = {
+                      "username": userNameController.text,
+                      "password": passwordController.text,
+                    };
+                    print(body.toString());
+
+                    AuthServices.register(body).then((code) {
+                      setState(() {
+                        isInCall = false;
+                      });
+                      if (code == 200) {
+                        showToast(
+                            context: context,
+                            msg:
+                                "Utilisateur créé avec succès!\nUtilisez vos informations d'identification pour vous connecter");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginPage(),
+                          ),
+                        );
+                      } else {
+                        showToast(
+                            context: context,
+                            msg:
+                                "Une erreur s'est produite. Veuillez réessayer!");
+                      }
+                    });
                   },
                   child: Container(
                     height: 50,
                     width: MediaQuery.of(context).size.width,
-                    decoration:  BoxDecoration(
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
-                      color:Colors.red,
+                      color: Colors.red,
                     ),
-                    child: Center(child: Text('Login',  style: GoogleFonts.montserrat(
-                      textStyle:const TextStyle(color: Colors.white, fontSize: 20,fontWeight: FontWeight.bold),
-                    ),)),
+                    child: Center(
+                        child: Text(
+                      'Login',
+                      style: GoogleFonts.montserrat(
+                        textStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    )),
                   ),
                 ),
                 InkWell(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>
-                        SignUpPage()));
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => SignUpPage()));
                   },
-                  child: Center(child: Text('don\'t have an account ! sign up',  style: GoogleFonts.montserrat(
-                    textStyle:const TextStyle(color: Colors.black, fontSize: 12,),
-                  ),)),
+                  child: Center(
+                      child: Text(
+                    'don\'t have an account ! sign up',
+                    style: GoogleFonts.montserrat(
+                      textStyle: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                      ),
+                    ),
+                  )),
                 ),
               ],
             ),
-
           ],
         ),
       ),
